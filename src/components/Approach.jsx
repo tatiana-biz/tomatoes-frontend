@@ -1,0 +1,51 @@
+function Approach() {
+  const steps = [
+    {
+      number: '01',
+      title: 'Discovery & Systems Audit',
+      desc: 'Understand goals, constraints, and the current tooling landscape. Identify automation opportunities with ROI.',
+      tagline: 'Start strong in days.'
+    },
+    {
+      number: '02',
+      title: 'Design & Prototype',
+      desc: 'Blueprint the workflow, craft the data model, and prototype the critical path with realistic integrations.',
+      tagline: 'From brief to prototype at speed.'
+    },
+    {
+      number: '03',
+      title: 'Build & Integrate',
+      desc: 'Implement backend services, dashboards, and AI assistants. Ship in small iterations for fast feedback.',
+      tagline: 'Deliverables weekly, momentum daily.'
+    },
+    {
+      number: '04',
+      title: 'Launch & Iterate',
+      desc: 'Measure impact, refine automations, and add guardrails. Scale with confidence as the venture grows.',
+      tagline: 'Iterate fast, scale faster.'
+    },
+  ]
+
+  return (
+    <section id="approach" className="relative mx-auto mt-24 max-w-7xl px-6">
+      <div className="mb-8 text-center">
+        <h2 className="text-3xl font-bold text-white sm:text-4xl">A pragmatic approach</h2>
+        <p className="mt-3 text-blue-100">Focused on outcomes, not endless sprints.</p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {steps.map((s) => (
+          <div key={s.number} className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+            <div className="text-sm font-mono text-cyan-200">{s.number}</div>
+            <h3 className="mt-2 text-lg font-semibold text-white">{s.title}</h3>
+            <p className="mt-1 text-sm text-blue-100/90">{s.desc}</p>
+            <div className="mt-4 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <div className="mt-2 text-xs text-blue-200/80">{s.tagline}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+export default Approach
