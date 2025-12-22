@@ -1,42 +1,54 @@
 function TomatoLogo({ size = 28, className = '' }) {
+  const ICON_SRC =
+    'https://flamesimagestorage.blob.core.windows.net/files/3a9a996f-a983-40e2-b937-d302f1ed1991_1766444784464_prj_stpc6td2/b511e0ad-aba5-416f-9521-5c7b039c3213-blue-tomato.png'
+
+  const radius = Math.round(size * 0.24)
+  const pad = size * 0.14
+  const iw = size - pad * 2
+  const ih = size - pad * 2
+
   return (
     <svg
       className={className}
       width={size}
       height={size}
-      viewBox="0 0 24 24"
+      viewBox={`0 0 ${size} ${size}`}
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
+      style={{ filter: 'drop-shadow(0 1px 6px rgba(14,165,233,0.25))' }}
     >
       <defs>
-        {/* Brand gradient (cyan → blue) */}
-        <linearGradient id="tomatoGrad" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id="brandGrad" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#06b6d4" />
           <stop offset="100%" stopColor="#2563eb" />
         </linearGradient>
-        {/* Soft inner shine */}
-        <radialGradient id="shine" cx="35%" cy="35%" r="50%">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.50)" />
-          <stop offset="60%" stopColor="rgba(255,255,255,0.18)" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-        </radialGradient>
       </defs>
 
-      {/* Body (no background) */}
-      <circle cx="12" cy="13" r="7" fill="url(#tomatoGrad)" stroke="white" strokeOpacity="0.28" strokeWidth="1.4" />
+      {/* Gradient rounded tile */}
+      <rect x="0" y="0" width={size} height={size} rx={radius} fill="url(#brandGrad)" />
 
-      {/* Crown / leaves */}
-      <path
-        d="M12 6.4c-1.4-.9-2.9-1.3-4.3-1.3 1.5-1.2 3.3-1.9 5.2-1.9s3.7.7 5.2 1.9c-1.4 0-2.9.4-4.3 1.3-.6.3-1.2.3-1.8 0z"
-        fill="#60a5fa"
-        opacity="0.95"
+      {/* White tomato icon centered with padding */}
+      <image
+        href={ICON_SRC}
+        x={pad}
+        y={pad}
+        width={iw}
+        height={ih}
+        preserveAspectRatio="xMidYMid meet"
+        crossOrigin="anonymous"
       />
 
-      {/* Subtle highlight */}
-      <path d="M8.8 12.2c1.6-1.1 3.2-1.1 4.6 0" stroke="white" strokeOpacity="0.25" strokeWidth="1" strokeLinecap="round" />
-
-      {/* Inner shine overlay for premium feel */}
-      <circle cx="12" cy="13" r="7" fill="url(#shine)" opacity="0.20" />
+      {/* Soft outline for contrast */}
+      <rect
+        x={0.5}
+        y={0.5}
+        width={size - 1}
+        height={size - 1}
+        rx={radius - 0.5}
+        fill="none"
+        stroke="white"
+        strokeOpacity="0.28"
+      />
     </svg>
   )
 }

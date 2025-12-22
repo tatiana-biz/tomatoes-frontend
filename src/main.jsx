@@ -9,6 +9,7 @@ import Pricing from './pages/Pricing'
 import Contact from './pages/Contact'
 import NotFound from './pages/NotFound'
 import AnalyticsManager from './components/AnalyticsManager'
+import CrispChat from './components/CrispChat'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -25,5 +26,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       </Routes>
     </BrowserRouter>
     <AnalyticsManager />
+    <CrispChat />
   </React.StrictMode>,
 )
