@@ -66,6 +66,11 @@ function Features() {
           )
         })}
       </div>
+
+      {/* Page-level link to Solutions page for alignment */}
+      <div className="mt-10 flex justify-center">
+        <a href="/solutions" className="text-sm font-semibold text-cyan-300 hover:text-cyan-200 transition-colors">Explore full Solutions →</a>
+      </div>
     </section>
   )
 }

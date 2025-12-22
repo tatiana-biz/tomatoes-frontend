@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, PhoneCall } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import TomatoLogo from './TomatoLogo'
 
@@ -21,8 +21,9 @@ function Navbar() {
             <Link to="/approach" className="text-sm text-blue-100 hover:text-white transition-colors">Approach</Link>
             <Link to="/pricing" className="text-sm text-blue-100 hover:text-white transition-colors">Pricing</Link>
             <Link to="/contact" className="text-sm text-blue-100 hover:text-white transition-colors">Contact</Link>
-            <Link to="/contact" className="ml-2 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 hover:brightness-105 transition">
-              Book a strategy call
+            <Link to="/contact#book-a-call" className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 hover:brightness-105 transition">
+              <PhoneCall className="h-4 w-4" />
+              Book a Strategy Call
               <ArrowRight className="h-4 w-4" />
             </Link>
           </nav>
@@ -43,8 +44,9 @@ function Navbar() {
               <Link to="/approach" className="rounded-lg px-2 py-2 text-sm text-blue-100 hover:text-white">Approach</Link>
               <Link to="/pricing" className="rounded-lg px-2 py-2 text-sm text-blue-100 hover:text-white">Pricing</Link>
               <Link to="/contact" className="rounded-lg px-2 py-2 text-sm text-blue-100 hover:text-white">Contact</Link>
-              <Link to="/contact" className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20">
-                Book a strategy call
+              <Link to="/contact#book-a-call" className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20">
+                <PhoneCall className="h-4 w-4" />
+                Book a Strategy Call
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
