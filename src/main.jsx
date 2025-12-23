@@ -7,6 +7,7 @@ import Solutions from './pages/Solutions'
 import ApproachPage from './pages/Approach'
 import Pricing from './pages/Pricing'
 import Contact from './pages/Contact'
+import Blog from './pages/Blog'
 import NotFound from './pages/NotFound'
 import AnalyticsManager from './components/AnalyticsManager'
 import CrispChat from './components/CrispChat'
@@ -21,6 +22,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/solutions" element={<Solutions />} />
         <Route path="/approach" element={<ApproachPage />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

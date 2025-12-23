@@ -7,14 +7,7 @@ function clamp(n, min, max) {
 
 function Hero() {
   const [inView, setInView] = useState(false)
-  const [progress, setProgress] = useState(0)
   const observeRef = useRef(null)
-  const stageRef = useRef(null)
-
-  // Switch back to our very initial default visual
-  const FALLBACK_HERO_URL =
-    'https://flamesimagestorage.blob.core.windows.net/files/b3060c4d-4ed8-488e-a227-a906795778ee_1766425472901_prj_stpc6td2/fd3a6d49-286b-4e43-a018-0ba6b6c545f6-bluetomatoes.jpeg'
-  const heroImageUrl = FALLBACK_HERO_URL
 
   const prefersReducedMotion =
     typeof window !== 'undefined' &&
@@ -34,75 +27,51 @@ function Hero() {
     return () => obs.disconnect()
   }, [])
 
-  // Robust scroll progress
-  useEffect(() => {
-    const el = observeRef.current
-    if (!el) return
-    const rect0 = el.getBoundingClientRect()
-    const scrollTop0 = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
-    const elTopPage = rect0.top + scrollTop0
+  // Parallax tilt + scroll motion
+  const cardRef = useRef(null)
+  const [parallax, setParallax] = useState({ x: 0.5, y: 0.5 })
+  const [scrollY, setScrollY] = useState(0)
 
-    const update = () => {
-      const vh = window.innerHeight || 800
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
-      const scrolledPastTop = scrollTop - elTopPage
-      const range = vh * 0.9
-      const p = clamp(scrolledPastTop / range, 0, 1)
-      setProgress(p)
+  useEffect(() => {
+    if (prefersReducedMotion) return
+    const onMouseMove = (e) => {
+      if (!cardRef.current) return
+      const rect = cardRef.current.getBoundingClientRect()
+      const x = clamp((e.clientX - rect.left) / rect.width, 0, 1)
+      const y = clamp((e.clientY - rect.top) / rect.height, 0, 1)
+      setParallax({ x, y })
     }
-    const onScroll = () => requestAnimationFrame(update)
-    update()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', update)
+    const onScroll = () => setScrollY(window.scrollY || 0)
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('scroll', onScroll)
     return () => {
+      window.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', update)
-    }
-  }, [])
-
-  // Pointer parallax + hover boost
-  const [pointerTilt, setPointerTilt] = useState({ x: 0, y: 0 })
-  const [hoverActive, setHoverActive] = useState(false)
-  useEffect(() => {
-    const el = stageRef.current
-    if (!el) return
-    const onMove = (e) => {
-      const rect = el.getBoundingClientRect()
-      const cx = rect.left + rect.width / 2
-      const cy = rect.top + rect.height / 2
-      const dx = e.clientX - cx
-      const dy = e.clientY - cy
-      const nx = clamp(dx / (rect.width / 2), -1, 1)
-      const ny = clamp(dy / (rect.height / 2), -1, 1)
-      const factor = prefersReducedMotion ? 0.35 : 1
-      setPointerTilt({ x: ny * 12 * factor, y: -nx * 16 * factor })
-    }
-    const onEnter = () => setHoverActive(true)
-    const onLeave = () => {
-      setHoverActive(false)
-      setPointerTilt({ x: 0, y: 0 })
-    }
-    el.addEventListener('mousemove', onMove)
-    el.addEventListener('mouseenter', onEnter)
-    el.addEventListener('mouseleave', onLeave)
-    return () => {
-      el.removeEventListener('mousemove', onMove)
-      el.removeEventListener('mouseenter', onEnter)
-      el.removeEventListener('mouseleave', onLeave)
     }
   }, [prefersReducedMotion])
 
-  // Motion bounds
-  const baseMotion = prefersReducedMotion ? 0.6 : 1.6
-  const hoverBoost = hoverActive ? 1.3 : 1
-  const motionFactor = baseMotion * hoverBoost
-  const rotX = progress * 12 * motionFactor + pointerTilt.x
-  const rotY = progress * 16 * motionFactor + pointerTilt.y
-  const transY = progress * 24 * motionFactor
-  const scaleUp = 1 + progress * 0.12 * motionFactor
+  // Subtle ambient animation tick
+  const [tick, setTick] = useState(0)
+  useEffect(() => {
+    if (prefersReducedMotion) return
+    let raf
+    const loop = () => {
+      setTick((t) => (t + 1) % 10000)
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(raf)
+  }, [prefersReducedMotion])
 
-  // Neon intensity tied to progress
-  const neonIntensity = prefersReducedMotion ? 0.5 + progress * 0.2 : 0.6 + progress * 0.35
+  const maxTilt = 9 // degrees
+  const rotateX = prefersReducedMotion ? 0 : (0.5 - parallax.y) * maxTilt
+  const rotateY = prefersReducedMotion ? 0 : (parallax.x - 0.5) * maxTilt
+  const rollZ = prefersReducedMotion ? 0 : Math.sin(tick / 140) * 1.2 + clamp(scrollY * 0.01, -3, 3)
+  const liftY = prefersReducedMotion ? 0 : Math.sin(tick / 120) * 6 + clamp(scrollY * 0.06, -22, 22)
+
+  // Parallax offsets for inner glow layers
+  const glowOffsetX = prefersReducedMotion ? 0 : (parallax.x - 0.5) * 14
+  const glowOffsetY = prefersReducedMotion ? 0 : (parallax.y - 0.5) * 14
 
   return (
     <section className="relative overflow-hidden pt-28" ref={observeRef}>
@@ -114,10 +83,10 @@ function Hero() {
 
       <div className="relative mx-auto max-w-7xl px-6">
         <div className="grid items-center gap-12 lg:grid-cols-2">
-          {/* Copy column (updated to screenshot style + copy) */}
+          {/* Copy column */}
           <div className="max-w-2xl">
             <div className="inline-flex items-center rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-200">
-              For founders in tech, fintech and AI
+              For founders in fintech & consulting
             </div>
             <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
               Quietly powerful business automation
@@ -136,72 +105,79 @@ function Hero() {
             </div>
             {/* Supporting line */}
             <p className="mt-7 text-sm text-blue-200/80">
-              Built for speed and confidence — from day one.
+              We are a business automation agency. Building for speed and confidence — from day one.
             </p>
           </div>
 
-          {/* Visual column: image card with subtle neon edge (default image) */}
+          {/* Visual column (interactive neon card with parallax & scroll motion) */}
           <div className="relative h-[520px] w-full">
             <div
-              ref={stageRef}
-              className={`relative h-full w-full overflow-hidden rounded-3xl border border-white/10 bg-slate-950/20 backdrop-blur will-change-transform transition-opacity duration-500 ${
+              ref={cardRef}
+              className={`relative h-full w-full overflow-hidden rounded-3xl border border-white/10 bg-slate-950/20 backdrop-blur-lg transition-opacity duration-500 ${
                 inView ? 'opacity-100' : 'opacity-0'
               }`}
-              style={{ perspective: '1200px', transformStyle: 'preserve-3d' }}
             >
-              {/* Stage background + subtle neon wash */}
-              <div className="absolute inset-0">
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      'radial-gradient(220px_220px_at_35%_35%, rgba(34,211,238,0.22), transparent 70%), radial-gradient(260px_260px_at_70%_65%, rgba(59,130,246,0.22), transparent 70%)',
-                    filter: 'blur(6px)',
-                    opacity: 0.35 + progress * 0.25,
-                    transition: prefersReducedMotion ? 'opacity 280ms ease-out' : 'opacity 140ms ease-out',
-                  }}
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))',
-                  }}
-                />
+              {/* Ambient washes following cursor */}
+              <div
+                className="pointer-events-none absolute -inset-10"
+                style={{
+                  transform: `translate3d(${glowOffsetX}px, ${glowOffsetY}px, 0)`,
+                  transition: prefersReducedMotion ? 'transform 300ms ease-out' : 'transform 90ms ease-out',
+                }}
+              >
+                <div className="absolute inset-0" style={{
+                  background:
+                    'radial-gradient(260px_220px_at_30%_30%, rgba(34,211,238,0.18), transparent 70%), radial-gradient(340px_260px_at_70%_65%, rgba(59,130,246,0.20), transparent 70%)',
+                  filter: 'blur(10px)',
+                  opacity: 0.45,
+                }} />
+                <div className="absolute inset-0" style={{
+                  background:
+                    'radial-gradient(280px_280px_at_50%_50%, rgba(255,255,255,0.06), transparent 70%)',
+                  filter: 'blur(18px)',
+                  opacity: 0.35,
+                }} />
               </div>
 
-              {heroImageUrl && (
+              {/* Card container with perspective */}
+              <div className="absolute left-1/2 top-1/2 w-[740px] max-w-full -translate-x-1/2 -translate-y-1/2">
                 <div
-                  className="absolute left-1/2 top-1/2 h-[380px] w-[620px] -translate-x-1/2 -translate-y-1/2"
-                  style={{
-                    transform: `translate(-50%, -50%) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(${transY}px) scale(${scaleUp})`,
-                    transformStyle: 'preserve-3d',
-                    transition: prefersReducedMotion ? 'transform 280ms ease-out' : 'transform 140ms ease-out',
-                    willChange: 'transform',
-                  }}
+                  className="relative w-full rounded-2xl"
+                  style={{ perspective: '1000px' }}
                 >
-                  <img
-                    src={heroImageUrl}
-                    alt="Hero visual"
-                    className="h-full w-full rounded-[24px] object-cover"
-                    style={{
-                      boxShadow:
-                        '0 28px 70px rgba(0,0,0,0.48), inset 0 0 0 1px rgba(255,255,255,0.06)',
-                    }}
-                  />
-                  {/* Subtle neon edge accent on top-left */}
                   <div
-                    className="pointer-events-none absolute left-4 right-28 top-5 h-[2px] rounded-full"
+                    className="relative w-full overflow-hidden rounded-2xl"
                     style={{
-                      background:
-                        'linear-gradient(90deg, rgba(56,189,248,0.0), rgba(56,189,248,0.95), rgba(59,130,246,0.95), rgba(59,130,246,0.0))',
-                      filter: 'blur(6px)',
-                      opacity: 0.42 + neonIntensity * 0.32,
+                      transformStyle: 'preserve-3d',
+                      transform: `translateY(${liftY}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rollZ}deg)`,
+                      transition: prefersReducedMotion ? 'transform 300ms ease-out' : 'transform 75ms ease-out',
+                      boxShadow: '0 30px 80px rgba(0,0,0,0.5)',
                     }}
-                  />
-                  {/* Soft border */}
-                  <div className="pointer-events-none absolute inset-0 rounded-[24px] ring-1 ring-white/10" />
+                  >
+                    {/* Image inside the animated card */}
+                    <img
+                      src="https://flamesimagestorage.blob.core.windows.net/files/c804a46c-c7fe-492b-9049-2cc7f565f6b2_1766478910387_prj_stpc6td2/732a8a6d-43d0-4cd4-bc7b-f2885248c8c1-bluetomatoes.jpeg"
+                      alt="Hero visual"
+                      className="block h-auto w-full"
+                      style={{
+                        display: 'block',
+                        background: 'linear-gradient(180deg, rgba(2,6,23,0.9), rgba(10,12,20,0.9))',
+                      }}
+                    />
+
+                    {/* Soft image overlay to blend with theme */}
+                    <div
+                      className="pointer-events-none absolute inset-0"
+                      style={{
+                        background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))',
+                      }}
+                    />
+
+                    {/* Soft inner ring */}
+                    <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/10" />
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
