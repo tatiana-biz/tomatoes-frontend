@@ -1,28 +1,30 @@
-module.exports = async (req, res) => {
-  // Always respond OK so RankPill can't get a 405 while we debug
-  if (req.method === "OPTIONS" || req.method === "HEAD") {
+export default async function handler(req, res) {
+  // TEMP: allow everything so we can confirm RankPill connectivity
+  res.setHeader("Allow", "POST, GET, OPTIONS");
+
+  if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  if (req.method === "GET") {
-    return res.status(200).json({ ok: true, message: "rankpill endpoint alive", method: req.method });
-  }
+  try {
+    const body =
+      typeof req.body === "object"
+        ? req.body
+        : JSON.parse(req.body || "{}");
 
-  // Accept POST/PUT/PATCH too
-  if (req.method !== "POST" && req.method !== "PUT" && req.method !== "PATCH") {
-    return res.status(200).json({ ok: true, message: "accepted", method: req.method });
-  }
+    console.log("RankPill webhook received");
+    console.log("Method:", req.method);
+    console.log("Headers:", req.headers);
+    console.log("Body:", body);
 
-  return res.status(200).json({
-    ok: true,
-    message: "webhook received",
-    method: req.method,
-    headers: {
-      authorization: req.headers.authorization ? "present" : "missing",
-      x_rankpill_signature: req.headers["x-rankpill-signature"] ? "present" : "missing",
-      user_agent: req.headers["user-agent"] || null
-    },
-    receivedKeys: Object.keys(req.body || {}),
-  });
-};
+    return res.status(200).json({
+      ok: true,
+      received: true,
+      test: body.test === true,
+    });
+  } catch (err) {
+    console.error("Webhook error:", err);
+    return res.status(500).json({ error: "Webhook crashed" });
+  }
+}
 
